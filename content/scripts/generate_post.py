@@ -1,20 +1,25 @@
 import os
 import requests
 from datetime import date
+import base64
 
-# Gemini API key
-GEMINI_API_KEY = os.environ.get("AIzaSyAtPtlYFt3ywP_muneh0G2TzxDAZPiI2i8")
+# ===========================
+# مقادیر ثابت (Secrets جایگذاری شده)
+# ===========================
+GEMINI_API_KEY = "AIzaSyAtPtlYFt3ywP_muneh0G2TzxDAZPiI2i8"
+WP_URL = "https://arenapc.shop/wp-json/wp/v2/posts"
+WP_USER = "ayhan"
+WP_APP_PASSWORD = "RKf9 17cU kEJ7 Mrz7 l9Is yYno"
 
-# WordPress API
-WP_URL = os.environ.get("https://arenapc.shop/wp-json/wp/v2/posts")  # مثلا https://example.com/wp-json/wp/v2/posts
-WP_TOKEN = os.environ.get("
-define('JWT_AUTH_SECRET_KEY', '6f#r3HrZ@jbn4+J-[Th>Kn{5%13^Di#4(($d6(gq*.3LXtSNnuO;)ezXBU[M$,VU');")  # JWT token
-
-# امروز
+# ===========================
+# نام فایل Markdown روزانه
+# ===========================
 today = date.today()
 file_name = f"content/{today}.md"
 
-# 1. گرفتن محتوا از Gemini
+# ===========================
+# تولید محتوا از Gemini AI
+# ===========================
 def generate_content():
     headers = {
         "Authorization": f"Bearer {GEMINI_API_KEY}",
@@ -24,19 +29,36 @@ def generate_content():
         "prompt": "یک پست تکنولوژی کوتاه و جذاب برای وبلاگ بنویس",
         "max_output_tokens": 500
     }
-    response = requests.post("https://gemini.googleapis.com/v1beta2/text:generate", json=data, headers=headers)
-    content = response.json().get("output_text", "محتوا آماده نشد")
+    response = requests.post(
+        "https://gemini.googleapis.com/v1beta2/text:generate",
+        json=data,
+        headers=headers
+    )
+    try:
+        content = response.json().get("output_text", "محتوا آماده نشد")
+    except Exception as e:
+        content = f"خطا در دریافت محتوا: {e}"
     return content
 
-# 2. ذخیره در فایل Markdown
+# ===========================
+# ذخیره محتوا در Markdown
+# ===========================
 content = generate_content()
+os.makedirs("content", exist_ok=True)
 with open(file_name, "w", encoding="utf-8") as f:
     f.write(content)
 
-# 3. ارسال به وردپرس
+# ===========================
+# ارسال به وردپرس
+# ===========================
 def post_to_wordpress(content):
+    # Basic Auth با نام کاربری و Application Password
+    auth_str = f"{WP_USER}:{WP_APP_PASSWORD}"
+    auth_bytes = auth_str.encode("utf-8")
+    auth_b64 = base64.b64encode(auth_bytes).decode("utf-8")
+    
     headers = {
-        "Authorization": f"Bearer {WP_TOKEN}",
+        "Authorization": f"Basic {auth_b64}",
         "Content-Type": "application/json"
     }
     data = {
@@ -44,7 +66,11 @@ def post_to_wordpress(content):
         "content": content,
         "status": "publish"
     }
-    r = requests.post(WP_URL, json=data, headers=headers)
-    print(r.status_code, r.text)
+    try:
+        r = requests.post(WP_URL, json=data, headers=headers)
+        print(f"Status Code: {r.status_code}")
+        print(r.text)
+    except Exception as e:
+        print(f"خطا در ارسال به وردپرس: {e}")
 
 post_to_wordpress(content)
