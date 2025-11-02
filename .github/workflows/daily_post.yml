@@ -26,7 +26,7 @@ jobs:
 
     - name: Run Python Script
       env:
-        GEMINI_API_KEY: ${{ AIzaSyAtPtlYFt3ywP_muneh0G2TzxDAZPiI2i8 }}
-        WP_URL: ${{ https://arenapc.shop/wp-json/wp/v2/posts }}
+        GEMINI_API_KEY: ${{  AIzaSyAtPtlYFt3ywP_muneh0G2TzxDAZPiI2i8  }}
+        WP_URL: ${{  https://arenapc.shop/wp-json/wp/v2/posts  }}
         WP_TOKEN: ${{  define('JWT_AUTH_SECRET_KEY', '6f#r3HrZ@jbn4+J-[Th>Kn{5%13^Di#4(($d6(gq*.3LXtSNnuO;)ezXBU[M$,VU');  }}
       run: python scripts/generate_post.py
