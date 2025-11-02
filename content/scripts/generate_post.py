@@ -1,10 +1,10 @@
-import os
 import requests
 from datetime import date
+import os
 import base64
 
 # ===========================
-# مقادیر ثابت (Secrets جایگذاری شده)
+# مقادیر ثابت (کلیدها جایگذاری شده)
 # ===========================
 GEMINI_API_KEY = "AIzaSyAtPtlYFt3ywP_muneh0G2TzxDAZPiI2i8"
 WP_URL = "https://arenapc.shop/wp-json/wp/v2/posts"
@@ -52,7 +52,6 @@ with open(file_name, "w", encoding="utf-8") as f:
 # ارسال به وردپرس
 # ===========================
 def post_to_wordpress(content):
-    # Basic Auth با نام کاربری و Application Password
     auth_str = f"{WP_USER}:{WP_APP_PASSWORD}"
     auth_bytes = auth_str.encode("utf-8")
     auth_b64 = base64.b64encode(auth_bytes).decode("utf-8")
